@@ -1,27 +1,22 @@
 {
-    "name": "base-bailey-memory",
+    "name": "bot-whatsapp-base-bailey-json",
     "version": "1.0.0",
     "description": "",
     "main": "app.js",
     "scripts": {
-        "prestart": "npx eslint . --no-ignore",
-        "pre-copy": "cd .. && npm run  copy.lib base-baileys-memory",
+        "pre-copy": "cd .. && yarn run copy.lib base-baileys-json",
         "start": "node app.js"
     },
     "keywords": [],
     "dependencies": {
-        "@bot-whatsapp/bot": "latest",
-        "@bot-whatsapp/cli": "latest",
-        "@bot-whatsapp/database": "latest",
-        "@bot-whatsapp/provider": "latest",
-        "@bot-whatsapp/portal": "latest",
-        "@whiskeysockets/baileys": "6.5.0",
-        "wa-sticker-formatter": "4.4.4",
-        "cache-manager": "5.2.4"
-    },
-    "devDependencies": {
-        "eslint-plugin-bot-whatsapp": "latest",
-        "eslint": "^8.52.0"
+        "@adiwajshing/baileys": "4.4.0",
+        "@bot-whatsapp/bot": "^0.0.62-alpha.0",
+        "@bot-whatsapp/cli": "^0.0.68-alpha.0",
+        "@bot-whatsapp/database": "^0.0.60-alpha.0",
+        "@bot-whatsapp/portal": "^0.0.18-alpha.0",
+        "@bot-whatsapp/provider": "^0.0.66-alpha.0",
+        "mime-types": "2.1.35",
+        "wa-sticker-formatter": "4.3.2"
     },
     "author": "",
     "license": "ISC"
