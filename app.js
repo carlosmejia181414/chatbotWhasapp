@@ -1,83 +1,78 @@
-const {
-  createBot,
-  createProvider,
-  createFlow,
-  addKeyword,
-} = require('@bot-whatsapp/bot')
+const { createBot, createProvider, createFlow, addKeyword } = require('@bot-whatsapp/bot')
 
 const QRPortalWeb = require('@bot-whatsapp/portal')
 const BaileysProvider = require('@bot-whatsapp/provider/baileys')
 const MockAdapter = require('@bot-whatsapp/database/mock')
-const delay = (ms) => new Promise((res) => setTimeout(res, ms))
 
-/***
-* Simular peticion async http 1.5 segundos
-*/
-const fakeHTTPMenu = async () => {
-  console.log('⚡ Server request!')
-  await delay(1500)
-  console.log('⚡ Server return!')
-  return Promise.resolve([{ body: 'Arepas' }, { body: 'Empanadas' }])
-}
+const flowSecundario = addKeyword(['2', 'siguiente']).addAnswer(['📄 Aquí tenemos el flujo secundario'])
 
-/***
-* Simular peticion async http 0.5 segundos
-*/
-const fakeHTTPPayment = async () => {
-  const link = `https://www.buymeacoffee.com/leifermendez?t=${Date.now()}`
-  console.log('⚡ Server request!')
-  await delay(500)
-  console.log('⚡ Server return!')
-  return Promise.resolve([
-      { body: `Puedes hacer un *pago* en el siguiente link: ${link}` },
-  ])
-}
-
-const flujoCash = addKeyword('efectivo').addAnswer(
-  'Ok te espero con los billetes'
-)
-const flujosOnline = addKeyword('online').addAnswer(
-  ['Te envio el link'],
-  null,
-  async (_, { flowDynamic }) => {
-      const link = await fakeHTTPPayment()
-      return flowDynamic(link)
-  }
+const flowDocs = addKeyword(['doc', 'documentacion', 'documentación']).addAnswer(
+    [
+        '📄 Aquí encontras las documentación recuerda que puedes mejorarla',
+        'https://bot-whatsapp.netlify.app/',
+        '\n*2* Para siguiente paso.',
+    ],
+    null,
+    null,
+    [flowSecundario]
 )
 
-const flujoPedido = addKeyword(['pedido', 'pedir']).addAnswer(
-  '¿Como quieres pagar en *efectivo* o *online*?',
-  null,
-  null,
-  [flujoCash, flujosOnline]
+const flowTuto = addKeyword(['tutorial', 'tuto']).addAnswer(
+    [
+        '🙌 Aquí encontras un ejemplo rapido',
+        'https://bot-whatsapp.netlify.app/docs/example/',
+        '\n*2* Para siguiente paso.',
+    ],
+    null,
+    null,
+    [flowSecundario]
 )
 
-const conversacionPrincipal = addKeyword(['hola', 'ole', 'buenas'])
-  .addAnswer('Bienvenido al restaurante *La cuchara de palo 🙌*')
-  .addAnswer(
-      `El menu del día es el siguiente`,
-      null,
-      async (_, { flowDynamic }) => {
-          const menu = await fakeHTTPMenu()
-          return flowDynamic(menu)
-      }
-  )
-  .addAnswer('👉 Si deseas ordenar escribe *pedir*', { delay: 1500 }, null, [
-      flujoPedido,
-  ])
+const flowGracias = addKeyword(['gracias', 'grac']).addAnswer(
+    [
+        '🚀 Puedes aportar tu granito de arena a este proyecto',
+        '[*opencollective*] https://opencollective.com/bot-whatsapp',
+        '[*buymeacoffee*] https://www.buymeacoffee.com/leifermendez',
+        '[*patreon*] https://www.patreon.com/leifermendez',
+        '\n*2* Para siguiente paso.',
+    ],
+    null,
+    null,
+    [flowSecundario]
+)
+
+const flowDiscord = addKeyword(['discord']).addAnswer(
+    ['🤪 Únete al discord', 'https://link.codigoencasa.com/DISCORD', '\n*2* Para siguiente paso.'],
+    null,
+    null,
+    [flowSecundario]
+)
+
+const flowPrincipal = addKeyword(['hola', 'ole', 'alo'])
+    .addAnswer('🙌 Hola bienvenido a Pollipapas, en que te podemos ayudar hoy :')
+    .addAnswer(        [
+            'te comparto las siguientes opciones:',
+            '👉 *doc* para ver la documentación',
+            '👉 *gracias*  para ver la lista de videos',
+            '👉 *discord* unirte al discord',
+        ],
+        null,
+        null,
+        [flowDocs, flowGracias, flowTuto, flowDiscord]
+    )
 
 const main = async () => {
-  const adapterDB = new MockAdapter()
-  const adapterFlow = createFlow([conversacionPrincipal])
-  const adapterProvider = createProvider(BaileysProvider)
+    const adapterDB = new MockAdapter()
+    const adapterFlow = createFlow([flowPrincipal])
+    const adapterProvider = createProvider(BaileysProvider)
 
-  createBot({
-      flow: adapterFlow,
-      provider: adapterProvider,
-      database: adapterDB,
-  })
+    createBot({
+        flow: adapterFlow,
+        provider: adapterProvider,
+        database: adapterDB,
+    })
 
-  QRPortalWeb()
+    QRPortalWeb()
 }
 
 main()
